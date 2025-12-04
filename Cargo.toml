@@ -6,7 +6,8 @@ version      = "0.1.0"
 
 [[bin]]
 name = "enviornment_monitor"
-path = "./src/bin/main.rs"
+test = false
+bench = false
 
 [dependencies]
 esp-hal = { version = "1.0.0", features = ["esp32s3", "unstable"] }
