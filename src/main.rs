@@ -6,12 +6,22 @@
     holding buffers for the duration of a data transfer."
 )]
 
+use embassy_embedded_hal::shared_bus::asynch::spi::SpiDevice;
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
 use esp_backtrace as _;
 use esp_hal::clock::CpuClock;
+use esp_hal::gpio::{Level, Output, OutputConfig};
+use esp_hal::interrupt::bound_handler;
+use esp_hal::peripherals::SPI0;
+use esp_hal::rom::spiflash::esp_rom_spiflash_erase_sector;
 use esp_hal::timer::timg::TimerGroup;
 use esp_radio::ble::controller::BleConnector;
+use esp_hal::spi::master::{Config, Spi};
+use esp_hal::spi::Mode;
+use mipidsi::interface::SpiInterface;
+use embassy_sync::mutex::Mutex;
+use embassy_sync::blocking_mutex::raw::NoopRawMutex;
 
 extern crate alloc;
 
@@ -23,8 +33,27 @@ esp_bootloader_esp_idf::esp_app_desc!();
 async fn main(spawner: Spawner) -> ! {
     // generator version: 1.0.1
 
-    let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
+    let config = esp_hal::Config::default().with_cpu_clock(CpuClock::_80MHz);
     let peripherals = esp_hal::init(config);
+
+    let _display_enable = Output::new(peripherals.GPIO7, Level::High, OutputConfig::default()); //pull pin high to enable display
+    let _backlight = Output::new(peripherals.GPIO45, Level::High, OutputConfig::default()); // set medium backlight on
+    let rst = Output::new(peripherals.GPIO41, Level::Low, OutputConfig::default()); // reset pin
+    let cs = Output::new(peripherals.GPIO42, Level::Low, OutputConfig::default());  // keep low while driven display
+    let dc = Output::new(peripherals.GPIO40, Level::Low, OutputConfig::default()); // data/clock switch
+    let sck = peripherals.GPIO36;
+    let miso = peripherals.GPIO37;
+    let mosi = peripherals.GPIO35;
+
+    static SPI_BUS: static_cell::StaticCell<Mutex<NoopRawMutex, SPI0>> = static_cell::StaticCell::new();
+
+    let spi = Spi::new(peripherals.SPI2, Config::default().with_mode(Mode::_0)).unwrap().with_sck(sck).with_miso(miso).with_mosi(mosi).with_cs(cs);
+    let spi_bus = Mutex::new(spi);
+    let spi_bus = SPI_BUS.init(spi_bus);
+    let spi_device = SpiDevice::new(spi_bus, cs);
+    let mut buffer = [0_u8; 512];
+    let di = SpiInterface::new(spi_device, dc, &mut buffer);
+
 
     esp_alloc::heap_allocator!(#[esp_hal::ram(reclaimed)] size: 73744);
     // COEX needs more RAM - so we've added some more
