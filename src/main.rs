@@ -6,24 +6,17 @@
     holding buffers for the duration of a data transfer."
 )]
 
-use embassy_embedded_hal::shared_bus::asynch::spi::SpiDevice;
+extern crate alloc;
 use embassy_executor::Spawner;
 use embassy_time::{Duration, Timer};
-use esp_backtrace as _;
+use embedded_hal_bus::spi::ExclusiveDevice;
 use esp_hal::clock::CpuClock;
 use esp_hal::gpio::{Level, Output, OutputConfig};
-use esp_hal::interrupt::bound_handler;
-use esp_hal::peripherals::SPI0;
-use esp_hal::rom::spiflash::esp_rom_spiflash_erase_sector;
-use esp_hal::timer::timg::TimerGroup;
-use esp_radio::ble::controller::BleConnector;
 use esp_hal::spi::master::{Config, Spi};
 use esp_hal::spi::Mode;
+use esp_hal::timer::timg::TimerGroup;
+use esp_radio::ble::controller::BleConnector;
 use mipidsi::interface::SpiInterface;
-use embassy_sync::mutex::Mutex;
-use embassy_sync::blocking_mutex::raw::NoopRawMutex;
-
-extern crate alloc;
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
@@ -45,12 +38,12 @@ async fn main(spawner: Spawner) -> ! {
     let miso = peripherals.GPIO37;
     let mosi = peripherals.GPIO35;
 
-    static SPI_BUS: static_cell::StaticCell<Mutex<NoopRawMutex, SPI0>> = static_cell::StaticCell::new();
+    //static SPI_BUS: static_cell::StaticCell<Mutex<NoopRawMutex, Spi<Blocking>>> = static_cell::StaticCell::new();
 
-    let spi = Spi::new(peripherals.SPI2, Config::default().with_mode(Mode::_0)).unwrap().with_sck(sck).with_miso(miso).with_mosi(mosi).with_cs(cs);
-    let spi_bus = Mutex::new(spi);
-    let spi_bus = SPI_BUS.init(spi_bus);
-    let spi_device = SpiDevice::new(spi_bus, cs);
+    let spi = Spi::new(peripherals.SPI2, Config::default().with_mode(Mode::_0)).unwrap().with_sck(sck).with_miso(miso).with_mosi(mosi);
+    // let spi_bus = Mutex::new(spi);
+    // let spi_bus = SPI_BUS.init(spi_bus);
+    let spi_device = ExclusiveDevice::new_no_delay(spi, cs).unwrap();
     let mut buffer = [0_u8; 512];
     let di = SpiInterface::new(spi_device, dc, &mut buffer);
 
