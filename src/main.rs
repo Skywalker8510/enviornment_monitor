@@ -25,7 +25,6 @@ use embedded_graphics::{
 };
 use embedded_hal::delay::DelayNs;
 use embedded_hal_bus::spi::ExclusiveDevice;
-use esp_backtrace;
 use esp_hal::clock::CpuClock;
 use esp_hal::delay::Delay;
 use esp_hal::gpio::{Level, Output, OutputConfig};
@@ -161,7 +160,7 @@ async fn main(spawner: Spawner) -> ! {
     let lines = 5; //Change based on number of lines displayed
     let max_w = display_w - 8;
     let min_w = 15;
-    let space_between = ((max_w - min_w) / lines);
+    let space_between = (max_w - min_w) / lines;
     print!("{}", space_between);
 
     let title = "Enviormental Monitor";

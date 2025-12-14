@@ -30,11 +30,6 @@ embassy-net = { version = "0.7.1", features = [
 embedded-io = "0.7.1"
 embedded-io-async = "0.7.0"
 esp-alloc = "0.9.0"
-esp-backtrace = { version = "0.18.1", features = [
-  "esp32s3",
-  "panic-handler",
-  "println",
-] }
 esp-println = { version = "0.16.1", features = ["esp32s3"] }
 # for more networking protocol support see https://crates.io/crates/edge-net
 bleps = { git = "https://github.com/bjoernQ/bleps", package = "bleps", rev = "a5148d8ae679e021b78f53fd33afb8bb35d0b62e", features = [
@@ -74,6 +69,7 @@ embedded-hal = "1.0.0"
 embedded-graphics = "0.8.1"
 bme680 = {git = "https://github.com/marcelbuesing/bme680"}
 log = "0.4.29"
+esp-backtrace = { version = "0.18.1", features = ["panic-handler", "esp32s3", "println"] }
 
 
 [profile.dev]
