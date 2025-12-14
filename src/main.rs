@@ -24,7 +24,7 @@ use esp_hal::gpio::{Level, Output, OutputConfig};
 use esp_hal::spi::Mode;
 use esp_hal::spi::master::{Config, Spi};
 use esp_hal::timer::timg::TimerGroup;
-use esp_println::println;
+use esp_println::{print, println};
 use esp_radio::ble::controller::BleConnector;
 use mipidsi::interface::SpiInterface;
 use mipidsi::options::{Orientation, Rotation};
@@ -148,21 +148,27 @@ async fn main(spawner: Spawner) -> ! {
     let text_style_old = MonoTextStyle::new(&FONT_10X20, Rgb565::BLACK);
 
     //Static Display Text
+    let lines = 5; //Change based on number of lines displayed
+    let max_w = display_w - 8;
+    let min_w = 15;
+    let space_between = ((max_w - min_w)/lines);
+    print!("{}", space_between);
+
     let title = "Enviormental Monitor";
     let title_x = 0;
-    let title_y = 15;
+    let title_y = min_w as i32;
     let static_temp_text = "Temperature: ";
     let static_temp_x = 0;
-    let static_temp_y = 61;
+    let static_temp_y = (max_w - space_between*3) as i32;
     let static_pressure_text = "Pressure: ";
     let static_pressure_x = 0;
-    let static_pressure_y = 83;
+    let static_pressure_y = (max_w - space_between*2) as i32;
     let static_humidity_text = "Humidity: ";
     let static_humidity_x = 0;
-    let static_humidity_y = 105;
+    let static_humidity_y = (max_w - space_between) as i32;
     let static_gas_text = "Air Quality: ";
     let static_gas_x = 0;
-    let static_gas_y = 127;
+    let static_gas_y = max_w as i32;
 
     Text::new(title, Point::new(title_x, title_y), text_style_new).draw(&mut display).unwrap();
     let a = Text::new(static_temp_text, Point::new(static_temp_x, static_temp_y), text_style_new).draw(&mut display).unwrap();
