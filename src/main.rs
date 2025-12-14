@@ -50,15 +50,11 @@ async fn main(spawner: Spawner) -> ! {
     let miso = peripherals.GPIO37;
     let mosi = peripherals.GPIO35;
 
-    //static SPI_BUS: static_cell::StaticCell<Mutex<NoopRawMutex, Spi<Blocking>>> = static_cell::StaticCell::new();
-
     let spi = Spi::new(peripherals.SPI2, Config::default().with_mode(Mode::_0))
         .unwrap()
         .with_sck(sck)
         .with_miso(miso)
         .with_mosi(mosi);
-    // let spi_bus = Mutex::new(spi);
-    // let spi_bus = SPI_BUS.init(spi_bus);
     let spi_device = ExclusiveDevice::new_no_delay(spi, cs).unwrap();
     let mut buffer = [0_u8; 512];
     let di = SpiInterface::new(spi_device, dc, &mut buffer);
@@ -140,10 +136,6 @@ async fn main(spawner: Spawner) -> ! {
     // loop {
     //     Timer::after(Duration::from_secs(1)).await;
     // }
-
-    // Turn off backlight and clear the display
-    backlight.set_low();
-    display.clear(Rgb565::BLACK).unwrap();
 
     // for inspiration have a look at the examples at https://github.com/esp-rs/esp-hal/tree/esp-hal-v1.0.0/examples/src/bin
 }
