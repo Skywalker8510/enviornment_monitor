@@ -9,24 +9,24 @@
 extern crate alloc;
 use embassy_executor::Spawner;
 use embedded_graphics::{
-    mono_font::{ascii::FONT_10X20, MonoTextStyle},
+    mono_font::{MonoTextStyle, ascii::FONT_10X20},
     pixelcolor::Rgb565,
     prelude::*,
     text::Text,
 };
 use embedded_hal_bus::spi::ExclusiveDevice;
+use esp_backtrace;
 use esp_hal::clock::CpuClock;
 use esp_hal::delay::Delay;
 use esp_hal::gpio::{Level, Output, OutputConfig};
-use esp_hal::spi::master::{Config, Spi};
 use esp_hal::spi::Mode;
+use esp_hal::spi::master::{Config, Spi};
 use esp_hal::timer::timg::TimerGroup;
+use esp_println::println;
 use esp_radio::ble::controller::BleConnector;
 use mipidsi::interface::SpiInterface;
-use mipidsi::{models::ST7789, options::ColorInversion, Builder, TestImage};
-use esp_backtrace;
-use esp_println::println;
 use mipidsi::options::{Orientation, Rotation};
+use mipidsi::{Builder, TestImage, models::ST7789, options::ColorInversion};
 
 // This creates a default app-descriptor required by the esp-idf bootloader.
 // For more information see: <https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/system/app_image_format.html#application-description>
@@ -44,7 +44,7 @@ async fn main(spawner: Spawner) -> ! {
     let _display_enable = Output::new(peripherals.GPIO7, Level::High, OutputConfig::default()); //pull pin high to enable display
     let mut backlight = Output::new(peripherals.GPIO45, Level::Low, OutputConfig::default()); // set medium backlight on
     let rst = Output::new(peripherals.GPIO41, Level::Low, OutputConfig::default()); // reset pin
-    let cs = Output::new(peripherals.GPIO42, Level::Low, OutputConfig::default());  // keep low while driven display
+    let cs = Output::new(peripherals.GPIO42, Level::Low, OutputConfig::default()); // keep low while driven display
     let dc = Output::new(peripherals.GPIO40, Level::Low, OutputConfig::default()); // data/clock switch
     let sck = peripherals.GPIO36;
     let miso = peripherals.GPIO37;
@@ -52,18 +52,25 @@ async fn main(spawner: Spawner) -> ! {
 
     //static SPI_BUS: static_cell::StaticCell<Mutex<NoopRawMutex, Spi<Blocking>>> = static_cell::StaticCell::new();
 
-    let spi = Spi::new(peripherals.SPI2, Config::default().with_mode(Mode::_0)).unwrap().with_sck(sck).with_miso(miso).with_mosi(mosi);
+    let spi = Spi::new(peripherals.SPI2, Config::default().with_mode(Mode::_0))
+        .unwrap()
+        .with_sck(sck)
+        .with_miso(miso)
+        .with_mosi(mosi);
     // let spi_bus = Mutex::new(spi);
     // let spi_bus = SPI_BUS.init(spi_bus);
     let spi_device = ExclusiveDevice::new_no_delay(spi, cs).unwrap();
     let mut buffer = [0_u8; 512];
     let di = SpiInterface::new(spi_device, dc, &mut buffer);
     let mut delay = Delay::new();
-    let mut display = Builder::new(ST7789, di).reset_pin(rst)
-        .display_size(display_w, displat_h).orientation(Orientation::new().rotate(Rotation::Deg90)).display_offset(52, 40).invert_colors(ColorInversion::Inverted)
+    let mut display = Builder::new(ST7789, di)
+        .reset_pin(rst)
+        .display_size(display_w, displat_h)
+        .orientation(Orientation::new().rotate(Rotation::Deg90))
+        .display_offset(52, 40)
+        .invert_colors(ColorInversion::Inverted)
         .init(&mut delay)
         .expect("Failed to initialize display");
-
 
     esp_alloc::heap_allocator!(#[esp_hal::ram(reclaimed)] size: 73744);
     // COEX needs more RAM - so we've added some more
@@ -110,8 +117,8 @@ async fn main(spawner: Spawner) -> ! {
         last = esp_hal::time::Instant::now();
         counter += 1;
 
-            // text_y -= char_h;
-            // text_y += char_h;
+        // text_y -= char_h;
+        // text_y += char_h;
 
         // // Fill the display with alternating colors every 8 frames
         // display.clear(colors[(counter / 8) % colors.len()]).unwrap();
@@ -123,7 +130,11 @@ async fn main(spawner: Spawner) -> ! {
             .unwrap();
         println!("{:?}", text_x);
         println!("{:?}", right.x);
-        text_x = if right.x <= 165 { display_w } else { text_x - char_w };
+        text_x = if right.x <= 165 {
+            display_w
+        } else {
+            text_x - char_w
+        };
     }
 
     // loop {
