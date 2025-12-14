@@ -111,6 +111,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bme680"
+version = "0.7.0"
+source = "git+https://github.com/marcelbuesing/bme680#838d1eaeb14be76a8d325eafd7e0896299aa9e68"
+dependencies = [
+ "bitflags 2.10.0",
+ "embedded-hal 1.0.0",
+ "log",
+]
+
+[[package]]
 name = "bt-hci"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -599,6 +609,7 @@ name = "enviornment_monitor"
 version = "0.1.0"
 dependencies = [
  "bleps",
+ "bme680",
  "critical-section",
  "embassy-executor",
  "embassy-net",
@@ -616,6 +627,7 @@ dependencies = [
  "esp-println",
  "esp-radio",
  "esp-rtos",
+ "log",
  "mipidsi",
  "smoltcp",
  "static_cell",
