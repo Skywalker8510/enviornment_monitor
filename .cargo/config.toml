@@ -2,6 +2,7 @@
 runner = "espflash flash --monitor --chip esp32s3"
 
 [env]
+ESP_RTOS_CONFIG_TICK_RATE_HZ = "1"
 
 [build]
 rustflags = [

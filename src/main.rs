@@ -242,6 +242,12 @@ async fn main(spawner: Spawner) -> ! {
             .unwrap();
         println!("Retrieving sensor data");
         let (data, state) = bmp688.get_sensor_data(&mut delayer).unwrap();
+        bmp688
+            .set_sensor_mode(&mut delayer, PowerMode::SleepMode)
+            .map_err(|e| {
+                log::error!("Unable to set sensor mode {e:?}");
+            })
+            .unwrap();
         println!("Sensor Data {:?}", data);
 
         if state == FieldDataCondition::NewData {
@@ -318,6 +324,6 @@ async fn main(spawner: Spawner) -> ! {
                 old_dyn_gas_text = dyn_gas_text;
             }
         }
-        Timer::after(Duration::from_secs(5)).await;
+        Timer::after(Duration::from_secs(30)).await;
     }
 }
