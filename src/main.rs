@@ -142,13 +142,12 @@ async fn main(spawner: Spawner) -> ! {
     let timg0 = TimerGroup::new(peripherals.TIMG0);
     esp_rtos::start(timg0.timer0);
 
-    let radio_init = esp_radio::init().expect("Failed to initialize Wi-Fi/BLE controller");
-    let (mut _wifi_controller, _interfaces) =
-        esp_radio::wifi::new(&radio_init, peripherals.WIFI, Default::default())
-            .expect("Failed to initialize Wi-Fi controller");
-    let _connector = BleConnector::new(&radio_init, peripherals.BT, Default::default());
+    // let radio_init = esp_radio::init().expect("Failed to initialize Wi-Fi/BLE controller");
+    // let (mut _wifi_controller, _interfaces) =
+    //     esp_radio::wifi::new(&radio_init, peripherals.WIFI, Default::default())
+    //         .expect("Failed to initialize Wi-Fi controller");
+    // let _connector = BleConnector::new(&radio_init, peripherals.BT, Default::default());
 
-    // TODO: Spawn some tasks
     let _ = spawner;
 
     let _ = display.clear(Rgb565::BLACK);
