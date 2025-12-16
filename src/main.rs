@@ -98,12 +98,12 @@ async fn main(spawner: Spawner) -> ! {
     let mut delay = Delay::new();
 
     let settings = SettingsBuilder::new()
-        .with_humidity_oversampling(OversamplingSetting::OS2x)
-        .with_pressure_oversampling(OversamplingSetting::OS4x)
-        .with_temperature_oversampling(OversamplingSetting::OS8x)
+        .with_humidity_oversampling(OversamplingSetting::OS8x)
+        .with_pressure_oversampling(OversamplingSetting::OS1x)
+        .with_temperature_oversampling(OversamplingSetting::OS16x)
         .with_temperature_filter(IIRFilterSize::Size3)
         .with_gas_measurement(Duration::from_millis(1500).into(), 320, 25)
-        .with_temperature_offset(-2.2)
+        .with_temperature_offset(0.9)
         .with_run_gas(true)
         .build();
 
